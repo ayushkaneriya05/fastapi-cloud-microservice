@@ -1,0 +1,16 @@
+# .dockerignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.log
+*.pem
+*.key
+*.crt
+*.env
+.venv/
+.git/
+.mypy_cache/
+.pytest_cache/

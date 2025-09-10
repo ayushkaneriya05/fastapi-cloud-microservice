@@ -1,0 +1,47 @@
+# pyproject.toml
+[project]
+name = "fastapi-cloud-microservice"
+version = "0.1.0"
+description = "FastAPI CRUD microservice with PostgreSQL, MongoDB, Docker, AWS"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic-settings",
+    "pydantic",
+    "pydantic[email]",
+    "sqlalchemy>=2.0",
+    "asyncpg",
+    "alembic==1.12.1",
+    "psycopg2-binary",
+    "motor",
+    "aioboto3",
+    "python-dotenv",
+    "boto3",
+    "python-multipart",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=3.2.0,<4.0.0",
+    "python-jose[cryptography]",
+    "tenacity",
+    "pyotp",
+]
+
+[tool.setuptools]
+packages = ["app"]
+
+[tool.uvicorn]
+reload = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+    "ruff",
+    "black",
+    "mypy",
+    "pytest-cov",
+    "aiosqlite",
+]

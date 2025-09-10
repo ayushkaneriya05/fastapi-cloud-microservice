@@ -1,0 +1,63 @@
+# docker-compose.yml
+services:
+  api:
+    build: .
+    command: ./entrypoint.sh
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    networks:
+      - appnet
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ecomdb
+      POSTGRES_USER: ecomuser
+      POSTGRES_PASSWORD: ecompass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecomuser -d ecomdb -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 8
+    networks:
+      - appnet
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand({ ping: 1 })' --quiet"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    networks:
+      - appnet
+
+  alembic:
+    build: .
+    command: alembic upgrade head
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - appnet
+
+volumes:
+  pgdata:
+  mongodata:
+
+networks:
+  appnet:
+    driver: bridge
