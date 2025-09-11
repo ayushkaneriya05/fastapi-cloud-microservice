@@ -1,6 +1,6 @@
 # app/schemas/order.py
 from app.db.models import OrderStatus
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 
 class OrderItemCreate(BaseModel):
@@ -16,8 +16,7 @@ class OrderItemOut(BaseModel):
     quantity: int
     price_at_purchase: float
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class OrderOut(BaseModel):
     id: int
@@ -26,5 +25,4 @@ class OrderOut(BaseModel):
     total: float
     items: List[OrderItemOut]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

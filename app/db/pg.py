@@ -54,7 +54,7 @@ async def wait_for_postgres():
     Tenacity handles retries with exponential backoff.
     """
     async with engine.connect() as conn:
-        await conn.execute(text("SELECT 1"))  # <- FIXED
+        await conn.execute(text("SELECT 1"))
     logger.info("Postgres available")
 
 # Dependency for fastapi endpoints

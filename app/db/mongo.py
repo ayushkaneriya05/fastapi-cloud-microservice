@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import AsyncGenerator
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ async def init_indexes():
 
 async def blacklist_token(jti: str, expires_in: int = 3600):
     db = get_mongo_db()
-    await db.token_blacklist.insert_one({"jti": jti, "expires_at": datetime.utcnow() + timedelta(seconds=expires_in)})
+    await db.token_blacklist.insert_one({"jti": jti, "expires_at": datetime.now(timezone.utc) + timedelta(seconds=expires_in)})
 
 async def is_token_blacklisted(jti: str) -> bool:
     db = get_mongo_db()
@@ -40,14 +40,14 @@ async def store_otp(email: str, otp: str, expires_in: int = 300):
     db = get_mongo_db()
     await db.otps.update_one(
         {"email": email},
-        {"$set": {"otp": otp, "expires_at": datetime.utcnow() + timedelta(seconds=expires_in)}},
+        {"$set": {"otp": otp, "expires_at": datetime.now(timezone.utc) + timedelta(seconds=expires_in)}},
         upsert=True
     )
 
 async def verify_otp(email: str, otp: str) -> bool:
     db = get_mongo_db()
     doc = await db.otps.find_one({"email": email})
-    if doc and doc["otp"] == otp and doc["expires_at"] > datetime.utcnow():
+    if doc and doc["otp"] == otp and doc["expires_at"] > datetime.now(timezone.utc):
         await db.otps.delete_one({"email": email})
         return True
     return False

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
@@ -9,31 +10,28 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title=settings.PROJECT_NAME, version="1.0")
-
-@app.on_event("startup")
-async def on_startup():
-    # wait for postgres to be accepting connections (retries included)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Code to run on startup
     try:
         await wait_for_postgres()
         await init_indexes()
-    except Exception as exc:
-        logger.exception("Postgres did not become available: %s", exc)
-        raise
-
-    # warm up mongo client (optional)
-    try:
         client = get_mongo_client()
-        # force server selection (will raise on failure)
         await client.admin.command("ping")
+        logger.info("Database connections established.")
     except Exception as exc:
-        logger.exception("MongoDB did not become available: %s", exc)
+        logger.exception("Failed to connect to databases on startup: %s", exc)
         raise
 
-@app.on_event("shutdown")
-async def on_shutdown():
+    yield # The application runs here
+
+    # Code to run on shutdown
     await close_engine()
     close_mongo_client()
+    logger.info("Database connections closed.")
+
+app = FastAPI(title=settings.PROJECT_NAME, version="1.0", lifespan=lifespan)
+
 
 # CORS
 app.add_middleware(

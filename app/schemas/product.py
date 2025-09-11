@@ -1,5 +1,5 @@
 # app/schemas/product.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 class ProductBase(BaseModel):
@@ -27,5 +27,4 @@ class ProductOut(BaseModel):
     image_key: Optional[str]
     is_active: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
