@@ -63,6 +63,7 @@ async def password_reset_request(email: str = Body(...)):
     send_email(email, "Password Reset OTP", f"Your OTP is: {otp}")
     return {"msg": "OTP sent to email"}
 
+
 # -------- Password Reset (verify OTP) --------
 @router.post("/password-reset/verify")
 async def password_reset_verify(email: str = Body(...), otp: str = Body(...), new_password: str = Body(...), db: AsyncSession = Depends(get_db)):
