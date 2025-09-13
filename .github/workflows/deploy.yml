@@ -58,21 +58,22 @@ jobs:
           ENV_PROD_FILE_CONTENT: ${{ secrets.ENV_PROD_FILE }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
         run: |
           ssh $EC2_USER@$EC2_HOST "
             set -e
             mkdir -p /home/$EC2_USER/app
 
-            # Install Docker and docker-compose if not installed
+            # Install Docker & docker-compose if not installed
             if ! command -v docker &> /dev/null; then
-              sudo apt-get update -y
-              sudo apt-get install -y docker.io curl
+              sudo dnf update -y
+              sudo dnf install -y docker awscli
               sudo systemctl enable docker
               sudo systemctl start docker
               sudo usermod -aG docker $EC2_USER
+
               # Install docker-compose v2
-              sudo curl -L \"https://github.com/docker/compose/releases/latest/download/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose
+              sudo curl -L \"https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose
               sudo chmod +x /usr/local/bin/docker-compose
             fi
 
@@ -91,10 +92,10 @@ jobs:
             # Export AWS creds for ECR login
             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            export AWS_DEFAULT_REGION=$AWS_REGION
+            export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 
             # Log in to AWS ECR
-            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $(echo $IMAGE | cut -d/ -f1)
+            aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $(echo $IMAGE | cut -d/ -f1)
 
             # Pull and run the new image
             docker pull $IMAGE
