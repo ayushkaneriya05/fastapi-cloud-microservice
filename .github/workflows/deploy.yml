@@ -1,4 +1,4 @@
-# This workflow builds and deploys the application to AWS EC2 without running tests.
+# This workflow builds and deploys the application to AWS EC2
 # It triggers automatically on a push to the 'main' branch and can also be run manually.
 name: Deploy to AWS EC2
 
@@ -95,7 +95,7 @@ jobs:
             export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 
             # Log in to AWS ECR
-            aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $(echo $IMAGE | cut -d/ -f1)
+            aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin \$(echo $IMAGE | cut -d/ -f1)
 
             # Pull and run the new image
             docker pull $IMAGE

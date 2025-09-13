@@ -18,7 +18,8 @@ target_metadata = Base.metadata
 import os
 
 database_url = os.getenv(
-    "DATABASE_URL_SYNC", "postgresql+asyncpg://user:password@localhost/dbname"
+    "DATABASE_URL_SYNC",
+    f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
 )
 config.set_main_option("sqlalchemy.url", database_url)
 

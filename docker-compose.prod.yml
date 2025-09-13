@@ -1,16 +1,16 @@
 services:
   api:
-    # The image will be pulled from AWS ECR, injected via environment variable
     image: ${IMAGE_NAME}
     restart: always
     ports:
-      # Map EC2 port 80 -> container port 8000
-      - "80:8000"
+      - "80:8000"  # Expose FastAPI on port 80
     env_file:
       - ./.env.prod
     command: >
       sh -c "
+      echo 'Running Alembic migrations...' &&
       alembic upgrade head &&
+      echo 'Starting FastAPI...' &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000
       "
     healthcheck:
