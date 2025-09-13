@@ -50,8 +50,7 @@ jobs:
         with:
           key: ${{ secrets.EC2_SSH_KEY }}
           known_hosts: "just-a-placeholder"
-      - name: Debug EC2_HOST
-        run: echo "EC2_HOST=${{ secrets.EC2_HOST }}"
+
       - name: Add EC2 to Known Hosts
         run: ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
@@ -72,19 +71,19 @@ jobs:
           ssh $EC2_USER@$EC2_HOST "echo '${ENV_PROD_FILE_CONTENT}' > /home/$EC2_USER/app/.env.prod"
 
           # SSH into the server to run deployment commands
-          ssh $EC2_USER@$EC2_HOST '
-            set -e # Exit immediately if a command fails
+          ssh $EC2_USER@$EC2_HOST "
+            set -e
             cd /home/$EC2_USER/app
-            
+
             # Log in to AWS ECR
-            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-            
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
             # Pull the new image
-            docker pull ${{ env.IMAGE }}
-            
+            docker pull $IMAGE
+
             # Set the image name for docker-compose
-            export IMAGE_NAME=${{ env.IMAGE }}
-            
+            export IMAGE_NAME=$IMAGE
+
             # Start the new container and remove old ones
             docker-compose -f docker-compose.prod.yml up -d --remove-orphans
-          '
+          "
