@@ -1,5 +1,5 @@
-# # This is a comprehensive CI pipeline for your FastAPI application.
-# # It lints and tests the code on every push and pull request to the main branch.
+# This is a comprehensive CI pipeline for your FastAPI application.
+# It lints and tests the code on every push and pull request to the main branch.
 # name: FastAPI CI Pipeline
 
 # on:
