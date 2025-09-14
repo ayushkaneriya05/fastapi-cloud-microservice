@@ -5,8 +5,7 @@ echo "🚀 Starting FastAPI app..."
 
 # Run DB migrations
 echo "📦 Running Alembic migrations..."
-alembic stamp head
-alembic revision --autogenerate -m "Auto migration"
+
 alembic upgrade head
 
 # Start app
