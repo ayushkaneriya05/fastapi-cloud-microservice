@@ -47,10 +47,18 @@ async def store_otp(email: str, otp: str, expires_in: int = 300):
 async def verify_otp(email: str, otp: str) -> bool:
     db = get_mongo_db()
     doc = await db.otps.find_one({"email": email})
-    if doc and doc["otp"] == otp and doc["expires_at"] > datetime.now(timezone.utc):
+    if not doc:
+        return False
+
+    expires_at = doc["expires_at"]
+    if expires_at.tzinfo is None:  # naive datetime from Mongo
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if doc["otp"] == otp and expires_at > datetime.now(timezone.utc):
         await db.otps.delete_one({"email": email})
         return True
     return False
+
 # FastAPI dependency
 async def mongo_db_dependency() -> AsyncGenerator[AsyncIOMotorDatabase, None]:
     yield get_mongo_db()
