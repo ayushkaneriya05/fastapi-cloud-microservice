@@ -32,7 +32,7 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
 
 @router.post("/logout")
-async def logout(request: Request, db: Session = Depends(get_db)):
+async def logout(request: Request, db: Session = Depends(get_db),current_user = Depends(get_current_active_user)):
     token = get_raw_token(request)            
     payload = decode_token(token) 
     if not payload:
