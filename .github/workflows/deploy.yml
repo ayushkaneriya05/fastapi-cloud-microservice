@@ -64,13 +64,17 @@ jobs:
             set -e
             mkdir -p /home/$EC2_USER/app
 
-            # Install Docker if not installed
+            # Install Docker & docker-compose if not installed
             if ! command -v docker &> /dev/null; then
               sudo dnf update -y
               sudo dnf install -y docker awscli
               sudo systemctl enable docker
               sudo systemctl start docker
               sudo usermod -aG docker $EC2_USER
+
+              # Install docker-compose v2
+              sudo curl -L \"https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
             fi
 
             # Write .env.prod file
@@ -80,31 +84,21 @@ jobs:
           # Copy deployment files
           scp docker-compose.prod.yml entrypoint.sh $EC2_USER@$EC2_HOST:/home/$EC2_USER/app/
 
-          # Deploy the container (fresh deployment)
+          # Deploy the container
           ssh $EC2_USER@$EC2_HOST "
             set -e
             cd /home/$EC2_USER/app
 
-            echo '🔴 Stopping old containers...'
-            docker compose -f docker-compose.prod.yml down --remove-orphans || true
-
-            echo '🧹 Cleaning old Docker resources...'
-            docker container prune -f || true
-            docker image prune -a -f || true
-            docker volume prune -f || true
-            docker network prune -f || true
-            docker system prune -a --volumes -f || true
-
-            echo '🔑 Logging in to AWS ECR...'
+            # Export AWS creds for ECR login
             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
             export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+
+            # Log in to AWS ECR
             aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin \$(echo $IMAGE | cut -d/ -f1)
 
-            echo '⬇️ Pulling new image...'
+            # Pull and run the new image
             docker pull $IMAGE
             export IMAGE_NAME=$IMAGE
-
-            echo '🚀 Starting fresh deployment...'
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker-compose -f docker-compose.prod.yml up -d --remove-orphans
           "
