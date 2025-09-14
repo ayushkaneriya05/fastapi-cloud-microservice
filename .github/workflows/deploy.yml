@@ -84,21 +84,31 @@ jobs:
           # Copy deployment files
           scp docker-compose.prod.yml entrypoint.sh $EC2_USER@$EC2_HOST:/home/$EC2_USER/app/
 
-          # Deploy the container
+          # Deploy the container (fresh deployment)
           ssh $EC2_USER@$EC2_HOST "
             set -e
             cd /home/$EC2_USER/app
 
-            # Export AWS creds for ECR login
+            echo '🔴 Stopping old containers...'
+            docker compose -f docker-compose.prod.yml down --remove-orphans || true
+
+            echo '🧹 Cleaning old Docker resources...'
+            docker container prune -f || true
+            docker image prune -a -f || true
+            docker volume prune -f || true
+            docker network prune -f || true
+            docker system prune -a --volumes -f || true
+
+            echo '🔑 Logging in to AWS ECR...'
             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
             export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
-
-            # Log in to AWS ECR
             aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin \$(echo $IMAGE | cut -d/ -f1)
 
-            # Pull and run the new image
+            echo '⬇️ Pulling new image...'
             docker pull $IMAGE
             export IMAGE_NAME=$IMAGE
-            docker-compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            echo '🚀 Starting fresh deployment...'
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
           "
