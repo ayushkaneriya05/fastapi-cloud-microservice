@@ -113,14 +113,15 @@ fastapi-cloud-microservice/
 ```mermaid
 flowchart TD
     Client[Client / Frontend] --> LB[Load Balancer / Nginx]
-    LB --> API[FastAPI Service (Docker on EC2)]
+    LB --> API[FastAPI Service - Docker on EC2]
     API --> PG[(PostgreSQL - AWS RDS)]
     API --> MG[(MongoDB - Atlas)]
     API --> S3[(AWS S3 - File Storage)]
 
-    Dev[GitHub Actions CI/CD] --> Registry[(Docker Registry - ECR/DockerHub)]
+    Dev[GitHub Actions CI/CD] --> Registry[Docker Registry - ECR/DockerHub]
     Registry --> EC2[(AWS EC2 Instance)]
     EC2 --> API
+
 
 ```
 
