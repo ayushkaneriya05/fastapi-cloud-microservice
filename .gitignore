@@ -122,8 +122,8 @@ yarn-error.log*
 .env.dev
 .env.prod
 .env.test
-.env.*
 !env.example
+# .env.*
 
 # Coverage / Reports
 .coverage
