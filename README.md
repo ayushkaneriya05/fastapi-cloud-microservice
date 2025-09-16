@@ -92,7 +92,6 @@ fastapi-cloud-microservice/
 │   │   └── product_repo.py  # Products persistence
 │   ├── schemas/             # Pydantic models (validation/serialization)
 │   └── main.py              # FastAPI entrypoint
-│
 │── alembic/                 # DB migrations (PostgreSQL)
 │── postgres-init/           # Init scripts for DB
 │── scripts/                 # Helper scripts (migrations, seeding)
@@ -102,7 +101,7 @@ fastapi-cloud-microservice/
 │── Dockerfile               # Service container
 │── entrypoint.sh            # Entrypoint for Docker
 │── alembic.ini              # Alembic configuration
-│── pyproject.toml           # Poetry dependencies
+│── pyproject.toml           # Project dependencies and metadata
 │── .github/workflows/       # CI/CD workflows
 │── .env.example             # Example environment config
 │── makefile                 # Useful commands
@@ -113,12 +112,16 @@ fastapi-cloud-microservice/
 
 ```mermaid
 flowchart TD
-    Client[Client / Frontend] --> API[FastAPI Service]
-    API --> PG[(PostgreSQL - RDS)]
+    Client[Client / Frontend] --> LB[Load Balancer / Nginx]
+    LB --> API[FastAPI Service (Docker on EC2)]
+    API --> PG[(PostgreSQL - AWS RDS)]
     API --> MG[(MongoDB - Atlas)]
     API --> S3[(AWS S3 - File Storage)]
-    Dev[GitHub Actions CI/CD] --> EC2[(AWS EC2)]
-    API --> EC2
+
+    Dev[GitHub Actions CI/CD] --> Registry[(Docker Registry - ECR/DockerHub)]
+    Registry --> EC2[(AWS EC2 Instance)]
+    EC2 --> API
+
 ```
 
 ---
