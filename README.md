@@ -28,7 +28,6 @@
 - [Running Tests](#running-tests)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
-<!-- - [License](#license) -->
 - [Author](#author)
 - [Acknowledgements](#acknowledgements)
 
@@ -332,7 +331,7 @@ Ayush Kaneriya - ayushkaneriya05@gmail.com
 [GitHub](https://github.com/ayushkaneriya05) | [LinkedIn](https://linkedin.com/in/ayush-kaneriya)
 
 **Project Link**: [https://github.com/ayushkaneriya05/fastapi-cloud-microservice](https://github.com/ayushkaneriya05/fastapi-cloud-microservice)
-
+**Deployed URL**: [fastapi-cloud-microservice](http://3.110.181.166/docs)
 ---
 
 ## Acknowledgements
